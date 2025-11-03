@@ -1,0 +1,111 @@
+---
+alwaysApply: true
+
+{
+  “projectName”: “gavi-kani”,
+  “description”: “A React (Next.js) app that uses the WaniKani API to generate Anki-style flashcards by kanji level.”,
+  “tech”: {
+    “framework”: “nextjs”,
+    “language”: “typescript”,
+    “ui”: “tailwindcss”,
+    “routing”: “file-based”,
+    “test”: “vitest + testing-library”
+  },
+  “env”: {
+    “WANIKANI_API_KEY”: “REQUIRED”,
+    “NEXT_PUBLIC_API_BASE”: “https://api.wanikani.com/v2”
+  },
+  “constraints”: [
+    “Only a single API request should be made when selecting a level (fetch all necessary info for that level).”,
+    “Do not implement full SRS; only flashcard presentation and export.”,
+    “App must work offline for current deck once fetched (cache in memory).”,
+    “Keep UI minimal and keyboard-friendly.”,
+    “Do not commit API key or secrets to the repo.”,
+    “Use server-side API proxy for WaniKani calls to protect key.”
+  ],
+  “tasks”: [
+    {
+      “id”: “init”,
+      “summary”: “Initialize Next.js TypeScript project with Tailwind CSS and git setup.”,
+      “deliverables”: [“Base scaffold”, “Tailwind config”, “tsconfig.json”]
+    },
+    {
+      “id”: “api-proxy”,
+      “summary”: “Add /api/wanikani route to proxy requests to the WaniKani API with pagination and retry handling.”,
+      “steps”: [
+        “Create pages/api/wanikani.ts”,
+        “Read WANIKANI_API_KEY from process.env”,
+        “Accept query params: types, levels”,
+        “Fetch all pages and return combined JSON”,
+        “Implement retry/backoff for 429s”
+      ],
+    “tests”: [“Simulate paged responses and assert aggregation”]
+    },
+    {
+      “id”: “dashboard”,
+      “summary”: “Create dashboard page listing levels 1–60 with clickable LevelTile components.”,
+      “deliverables”: [“LevelTile component”, “Dashboard page”, “Level navigation”]
+    },
+    {
+      “id”: “fetch-and-transform”,
+      “summary”: “Implement fetchAllSubjects and transform API data into Card[] objects.”,
+      “types”: [“Card”, “Subject”],
+      “tests”: [“Mapping correctness”, “Pagination aggregation”]
+    },
+    {
+      “id”: “deck-view”,
+      “summary”: “Create deck UI, Card flipping, keyboard navigation, and caching.”,
+      “deliverables”: [“Card component”, “DeckControls”, “Flip animation”]
+    },
+    {
+      “id”: “export”,
+      “summary”: “Implement CSV/JSON export feature for current deck.”,
+      “deliverables”: [“CSV/JSON export”, “Keyboard shortcut (E)”]
+    },
+    {
+      “id”: “tests”,
+      “summary”: “Add unit and integration tests for data mapping and UI behaviors.”,
+      “tests”: [“Transformer”, “Card flipping”, “Navigation”, “Export”]
+    },
+    {
+      “id”: “docs”,
+      “summary”: “Add README, .env.example, and developer notes.”,
+      “deliverables”: [“README.md”, “.env.example”, “DEV_NOTE.md”]
+    }
+  ],
+  “fileStructure”: {
+    “app/”: [“page.tsx”, “level/[n]/page.tsx”],
+    “components/”: [“Layout.tsx”, “LevelTile.tsx”, “Card.tsx”, “DeckControls.tsx”],
+    “lib/”: [“wanikaniClient.ts”, “wanikaniTypes.ts”, “ankiExport.ts”],
+    “hooks/”: [“useFetchLevel.ts”],
+    “tests/”: [“api.test.ts”, “transform.test.ts”, “ui.test.ts”]
+    },
+  “cardType”: {
+    “id”: “string”,
+    “kanji”: “string”,
+    “meanings”: “string[]”,
+    “readings”: “string[]”,
+    “examples”: [
+      {
+        “word”: “string”,
+        “meaning”: “string”
+      }
+    ]
+  },
+  “exportFormat”: {
+    “csv”: [“Front”, “Back”],
+    “json”: “Array”
+  },
+  “tests”: {
+    “unit”: [“API pagination”, “transform mapping”],
+    “ui”: [“Flip behavior”, “Keyboard navigation”, “Export output”]
+  },
+  “deliverables”: [
+    “cursor-rules.json”,
+    “source files”,
+    “README.md”,
+    “.env.example”,
+    “tests”
+  ]
+}
+---
