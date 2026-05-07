@@ -99,6 +99,7 @@ export interface Card {
   }[]
   characterImages?: CharacterImage[]
   level: number
+  visually_similar_subject_ids?: number[]
 }
 
 // Subject Type Enum

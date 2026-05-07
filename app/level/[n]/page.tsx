@@ -1,11 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useParams } from "next/navigation"
 import { useFetchLevel } from "@/hooks/useFetchLevel"
 import Card from "@/components/Card"
 import DeckControls from "@/components/DeckControls"
 import Link from "next/link"
+import { shuffleArray } from "@/lib/utils"
 
 export default function LevelPage() {
   const params = useParams()
@@ -16,6 +17,7 @@ export default function LevelPage() {
   const [filter, setFilter] = useState<
     "all" | "radical" | "kanji" | "vocabulary"
   >("kanji")
+  const [isShuffled, setIsShuffled] = useState(false)
 
   const handleFilterChange = (
     newFilter: "all" | "radical" | "kanji" | "vocabulary"
@@ -23,15 +25,22 @@ export default function LevelPage() {
     setFilter(newFilter)
   }
 
-  // Filter cards based on selected type
-  const filteredCards = cards.filter(
-    (card) => filter === "all" || card.type === filter
-  )
+  const handleShuffleToggle = () => {
+    setIsShuffled((prev) => !prev)
+  }
 
-  // Reset to first card when filter changes
+  // Filter and optionally shuffle cards
+  const filteredCards = useMemo(() => {
+    const filtered = cards.filter(
+      (card) => filter === "all" || card.type === filter
+    )
+    return isShuffled ? shuffleArray(filtered) : filtered
+  }, [cards, filter, isShuffled])
+
+  // Reset to first card when filter or shuffle changes
   useEffect(() => {
     setCurrentIndex(0)
-  }, [filter])
+  }, [filter, isShuffled])
 
   // Keyboard navigation
   useEffect(() => {
@@ -130,42 +139,70 @@ export default function LevelPage() {
               </h1>
             </div>
 
-            {/* Filter buttons */}
-            <div className="flex space-x-2">
-              {[
-                { key: "all", label: "All", count: cards.length },
-                {
-                  key: "radical",
-                  label: "Radicals",
-                  count: cards.filter((c) => c.type === "radical").length,
-                },
-                {
-                  key: "kanji",
-                  label: "Kanji",
-                  count: cards.filter((c) => c.type === "kanji").length,
-                },
-                {
-                  key: "vocabulary",
-                  label: "Vocabulary",
-                  count: cards.filter((c) => c.type === "vocabulary").length,
-                },
-              ].map(({ key, label, count }) => (
-                <button
-                  key={key}
-                  onClick={() =>
-                    handleFilterChange(
-                      key as "all" | "radical" | "kanji" | "vocabulary"
-                    )
-                  }
-                  className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                    filter === key
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
-                  }`}
+            {/* Filter and shuffle buttons */}
+            <div className="flex items-center space-x-4">
+              <div className="flex space-x-2">
+                {[
+                  { key: "all", label: "All", count: cards.length },
+                  {
+                    key: "radical",
+                    label: "Radicals",
+                    count: cards.filter((c) => c.type === "radical").length,
+                  },
+                  {
+                    key: "kanji",
+                    label: "Kanji",
+                    count: cards.filter((c) => c.type === "kanji").length,
+                  },
+                  {
+                    key: "vocabulary",
+                    label: "Vocabulary",
+                    count: cards.filter((c) => c.type === "vocabulary").length,
+                  },
+                ].map(({ key, label, count }) => (
+                  <button
+                    key={key}
+                    onClick={() =>
+                      handleFilterChange(
+                        key as "all" | "radical" | "kanji" | "vocabulary"
+                      )
+                    }
+                    className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                      filter === key
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+                    }`}
+                  >
+                    {label} ({count})
+                  </button>
+                ))}
+              </div>
+
+              {/* Shuffle toggle */}
+              <button
+                onClick={handleShuffleToggle}
+                className={`px-3 py-1 rounded text-sm font-medium transition-colors flex items-center ${
+                  isShuffled
+                    ? "bg-green-600 text-white"
+                    : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+                }`}
+                title="Randomize card order"
+              >
+                <svg
+                  className="w-4 h-4 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  {label} ({count})
-                </button>
-              ))}
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
+                  />
+                </svg>
+                Shuffle
+              </button>
             </div>
           </div>
         </div>

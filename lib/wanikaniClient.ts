@@ -87,6 +87,7 @@ export function transformSubjectsToCards(subjects: Subject[]): Card[] {
       examples,
       characterImages,
       level: data.level,
+      visually_similar_subject_ids: data.visually_similar_subject_ids,
     }
   })
 }
